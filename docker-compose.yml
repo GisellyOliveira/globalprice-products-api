@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+# Database (PostgreSQL)
+  db:
+    image: postgres:13
+    container_name: globalprice_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin_password}
+      POSTGRES_DB: ${POSTGRES_DB:-products_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - global_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-products_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Secondary API (Pricing Service)
+  pricing_service:
+    build: ../globalprice-pricing-api
+    container_name: pricing_api 
+    ports:
+      - "${PORT_SEC:-5001}:5000"
+    networks:
+      - global_network
+
+  # Main API (Product Service)
+  product_service:
+    build: .
+    container_name: product_api
+    ports:
+      - "${PORT_MAIN:-5000}:5000"
+    depends_on:
+      db:
+        condition: service_healthy 
+      pricing_service:
+        condition: service_started 
+    environment:
+      DOCKER_ENV: "true"
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin_password}
+      DB_HOST: ${DB_HOST:-db}
+      POSTGRES_DB: ${POSTGRES_DB:-products_db}
+      PRICING_SERVICE_URL: ${PRICING_SERVICE_URL:-http://pricing_service:5000}
+    networks:
+      - global_network
+
+networks:
+  global_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

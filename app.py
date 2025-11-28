@@ -70,7 +70,7 @@ def get_product(id):
     return jsonify(product.to_dict())
 
 
-@app.route('/product/<int:id>', methods=['PUT'])
+@app.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
     product = Product.query.get_or_404(id)
     data = request.get_json()
@@ -86,7 +86,7 @@ def update_product(id):
     return jsonify(product.to_dict())
 
 
-app.route('/products/<int:id>', methods=['DELETE'])
+@app.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
@@ -94,7 +94,7 @@ def delete_product(id):
     return jsonify({"message": "Product deleted successfully"})
 
 
-@app.route('/products/<int:id>', methods=['GET'])
+@app.route('/products/<int:id>/price/<currency>', methods=['GET'])
 def get_product_price_in_currency(id, currency):
     """
     Look up the product in the local database and use the Secondary API to convert the price.
