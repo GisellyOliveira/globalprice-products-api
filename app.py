@@ -204,7 +204,7 @@ def get_product_price_in_currency(id, currency):
         in: path
         type: string
         required: true
-        description: Target currency code (USD, EUR, BTC)
+        description: Target currency code (USD, EUR, BTC, GBP, JPY, ETH, ARS, etc.)
     responses:
       200:
         description: Returns product details with converted price

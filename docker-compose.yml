@@ -30,6 +30,11 @@ services:
       - "${PORT_SEC:-5001}:5000"
     networks:
       - global_network
+    environment:
+      PYTHONUNBUFFERED: 1
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    volumes:
+      - ../globalprice-pricing-api:/app
 
   # Main API (Product Service)
   product_service:
@@ -43,6 +48,7 @@ services:
       pricing_service:
         condition: service_started 
     environment:
+      PYTHONUNBUFFERED: 1
       DOCKER_ENV: "true"
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin_password}
