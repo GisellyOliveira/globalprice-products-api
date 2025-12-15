@@ -13,6 +13,8 @@ app.config['SWAGGER'] = {
     'title': 'GlobalPrice Product API',
     'uiversion': 3
 }
+
+app.json.sort_keys = False 
 swagger = Swagger(app)
 
 # PostgreSQL Settings if using Docker or SQLite if locally
@@ -223,7 +225,7 @@ def get_product_price_in_currency(id, currency):
     }
 
     try:
-        response = requests.post(f"{pricing_service_url}/convert", json=payload, timeout=5)
+        response = requests.post(f"{pricing_service_url}/convert", json=payload, timeout=30)
 
         if response.status_code == 200:
             conversion_data = response.json()
