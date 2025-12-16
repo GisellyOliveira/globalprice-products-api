@@ -13,6 +13,8 @@
 ## 📋 Project Description
 GlobalPrice is a distributed system designed to solve currency volatility risks in international e-commerce.
 
+It acts as a **RESTful Application** composed of independent modules that communicate via HTTP, strictly following the **REST** architectural style constraints (Client-Server, Stateless, Uniform Interface).
+
 **Architecture Pattern:** **Microservices (Scenario 2.1)**.
 *   **This Component (Main API):** Acts as a Proxy and Orchestrator. It manages the product catalog database and delegates pricing logic to the Secondary API.
 *   **Secondary Component (Pricing API):** Encapsulates business rules (spread calculation, smart rounding) and communicates with External Services (Exchange Rates & AI).
@@ -188,3 +190,10 @@ Once the system is running, access the **Interactive Swagger UI** to test all en
 | `PUT` | `/products/{id}` | **Update:** Modifies an existing product's data. |
 | `DELETE` | `/products/{id}` | **Delete:** Removes a product from the database. |
 | `GET` | `/products/{id}/price/{currency}` | **⭐ AI Integration:** Converts the product price to a target currency (e.g., USD, BTC, EUR) applying **AI-Driven Risk Analysis** and smart rounding. |
+
+---
+
+## 📄 License
+This project is licensed under the **MIT License** and is part of the GlobalPrice MVP architecture for the Software Architecture postgraduate course at the Pontifical Catholic University of Rio de Janeiro (PUC-Rio).
+
+See the [LICENSE](LICENSE) file for more details.
