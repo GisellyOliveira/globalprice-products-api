@@ -125,7 +125,7 @@ This project requires environment variables for Database credentials and the AI 
 
     # API Key (REQUIRED for AI Risk Analysis)
     # Get your free key at: https://aistudio.google.com/app/apikey
-    GEMINI_API_KEY=AIzaSyD...
+    GEMINI_API_KEY=AIwpkyT...
     ```
 
 3.  **Run the System:**
