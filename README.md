@@ -6,8 +6,6 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
 ![Swagger](https://img.shields.io/badge/Docs-Swagger-85EA2D?style=flat&logo=swagger&logoColor=black)
 
-> **MVP Project** developed for the Software Architecture postgraduate course at the Pontifical Catholic University of Rio de Janeiro (PUC-Rio).
-
 > **Core Microservice** for the GlobalPrice architecture. Handles product catalog management, data persistence, and orchestrates real-time AI-driven pricing analysis.
 
 ## 📋 Project Description
