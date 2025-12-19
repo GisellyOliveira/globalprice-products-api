@@ -1,8 +1,18 @@
-flask
-flask_cors
-requests
-flask_sqlalchemy
-psycopg2-binary
-google-generativeai
-python-dotenv
-flasgger
+# Web Framework & Core
+Flask==3.0.3
+flask-cors==4.0.1
+flasgger==0.9.7.1
+
+# Database & ORM
+flask_sqlalchemy==3.1.1
+psycopg2-binary==2.9.9
+
+# HTTP & API Clients
+requests==2.32.3
+google-generativeai==0.7.2
+
+# Production Server (CRÍTICO: Faltava este!)
+gunicorn==22.0.0
+
+# Utilities
+python-dotenv==1.0.1
