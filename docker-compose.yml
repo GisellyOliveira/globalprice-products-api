@@ -1,5 +1,6 @@
 services:
-# Database (PostgreSQL)
+# Database 
+  # PostgreSQL
   db:
     image: postgres:13
     container_name: globalprice_db
@@ -19,6 +20,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  # Redis:
+  redis:
+    image: redis:alpine
+    container_name: globalprice_cache
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - global_network
 
   # Secondary API (Pricing Service)
   pricing_service:
@@ -28,11 +39,29 @@ services:
       - "${PORT_SEC:-5001}:5000"
     networks:
       - global_network
+    depends_on:
+      - redis
     environment:
       PYTHONUNBUFFERED: 1
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      REDIS_HOST: redis
     volumes:
       - ../globalprice-pricing-api:/app
+
+  # WATCHDOG - Walter
+  watchdog_service:
+    build: ../globalprice-pricing-api
+    container_name: globalprice_watchdog
+    depends_on:
+      - redis
+    environment:
+      PYTHONUNBUFFERED: 1
+      REDIS_HOST: redis
+    volumes:
+      - ../globalprice-pricing-api:/app
+    command: ["python", "watchdog/walter.py"]
+    networks:
+      - global_network
 
   # Main API (Product Service)
   product_service:
