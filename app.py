@@ -11,7 +11,8 @@ CORS(app)
 # Swagger Settings
 app.config['SWAGGER'] = {
     'title': 'GlobalPrice Product API',
-    'uiversion': 3
+    'uiversion': 3,
+    'description': 'Product Management & Global Price Orchestration API.'
 }
 
 app.json.sort_keys = False 
@@ -43,6 +44,8 @@ def home():
     """
     Health check route.
     ---
+    tags:
+      - System Status
     responses:
       200:
         description: Returns the service status
@@ -59,6 +62,8 @@ def create_product():
     """
     Create a new product
     ---
+    tags:
+      - Product Management
     parameters:
       - name: body
         in: body
@@ -103,6 +108,8 @@ def list_products():
     """
     List all products
     ---
+    tags:
+      - Product Management
     responses:
       200:
         description: A list of products
@@ -116,6 +123,8 @@ def get_product(id):
     """
     Get a specific product by ID
     ---
+    tags:
+      - Product Management
     parameters:
       - name: id
         in: path
@@ -137,6 +146,8 @@ def update_product(id):
     """
     Update a product
     ---
+    tags:
+      - Product Management
     parameters:
       - name: id
         in: path
@@ -176,6 +187,8 @@ def delete_product(id):
     """
     Delete a product
     ---
+    tags:
+      - Product Management
     parameters:
       - name: id
         in: path
@@ -194,24 +207,69 @@ def delete_product(id):
 @app.route('/products/<int:id>/price/<currency>', methods=['GET'])
 def get_product_price_in_currency(id, currency):
     """
-    Get product price converted to target currency (Integration)
+     Global Price Simulator (AI + Watchdog).
     ---
+    tags:
+      - Pricing Simulation
+    description: >
+        Calculates the final product price in the target currency, applying dynamic risk margins.
+        Use the fields below to simulate different market scenarios and business strategies.
     parameters:
       - name: id
         in: path
         type: integer
         required: true
-        description: Product ID
+        description: Product ID (e.g., 1)
       - name: currency
         in: path
         type: string
         required: true
-        description: Target currency code (USD, EUR, BTC, GBP, JPY, ETH, ARS, etc.)
+        description: Target currency code (e.g., USD, EUR, BTC, ETH)
+      
+      - name: admin_fee
+        in: query
+        type: number
+        required: false
+        default: 0.005
+        description: >
+            PROFIT & FEES: How much extra margin do you want?
+            Use 0.0 for aggressive promos or increase it to cover credit card taxes.
+            (e.g., 0.005 = 0.5% | 0.02 = 2.0%)
+      
+      - name: volatility_threshold
+        in: query
+        type: number
+        required: false
+        default: 5.0
+        description: >
+            RISK TOLERANCE: How "nervous" is your system?
+            If daily market volatility exceeds this value (%), the 'Auto-Hedge' protection kicks in.
+            (e.g., 2.0 = Conservative/Safe | 10.0 = Aggressive/Risky)
+      
+      - name: max_panic_margin
+        in: query
+        type: number
+        required: false
+        default: 1.50
+        description: >
+             PANIC CEILING: The maximum price multiplier allowed during a market crash.
+             Protects brand reputation by preventing abusive pricing.
+             (e.g., 1.50 = Max price increase of 50%)
+
+      - name: force_panic
+        in: query
+        type: boolean
+        required: false
+        default: false
+        description: >
+            🚨 PANIC BUTTON (Simulation): Forces 'Walter Watchdog' behavior 
+            to test how the system protects revenue during an immediate market crash.
+    
     responses:
       200:
-        description: Returns product details with converted price
+        description: Successfully calculated price with strategy details.
       502:
-        description: Error communicating with Pricing Service
+        description: Error communicating with Pricing Service.
     """
     product = Product.query.get_or_404(id)
 
@@ -224,6 +282,30 @@ def get_product_price_in_currency(id, currency):
         "target_currency": currency.upper()
     }
 
+    # Add optional overrides if they exist in the request URL
+    if request.args.get('admin_fee'):
+        try:
+            payload['admin_fee'] = float(request.args.get('admin_fee'))
+        except ValueError:
+            pass # Ignore invalid numbers and use default
+    
+    if request.args.get('volatility_threshold'):
+        try:
+            payload['volatility_threshold'] = float(request.args.get('volatility_threshold'))
+        except ValueError:
+            pass
+    
+    if request.args.get('max_panic_margin'):
+        try:
+            payload['max_panic_margin'] = float(request.args.get('max_panic_margin'))
+        except ValueError:
+            pass
+    
+    # Check for boolean flag (strings like 'true', '1', 'yes' are considered True)
+    force_panic_raw = request.args.get('force_panic', '').lower()
+    if force_panic_raw in ['true', '1', 'yes', 'on']:
+        payload['force_panic'] = True
+
     try:
         response = requests.post(f"{pricing_service_url}/convert", json=payload, timeout=30)
 
@@ -233,7 +315,7 @@ def get_product_price_in_currency(id, currency):
             result['price_in_currency'] = conversion_data
             return jsonify(result)
         else:
-            return jsonify({"error": "Failed to convert price via Pricing Service"}), 502
+            return jsonify({"error": "Failed to convert price via Pricing Service", "details": response.text}), 502
     
     except requests.exceptions.ConnectionError:
         return jsonify({
